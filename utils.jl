@@ -2,18 +2,19 @@ using CodecZlib
 using CSV
 using DataFrames
 
+# Path to methylation data
 pa = "/nfs/turbo/lsa-bis/data_for_Kerby/illumina"
 
-function read_data(fp, keepchr)
+function read_data(fp, chrom)
 
     chr, numer, denom = String[], Int[], Int[]
     startpos, endpos = Int[], Int[]
     open(fp) do io
-        readline(io)
+        readline(io) # header
         for line in eachline(io)
             x = split(line, "\t")
             c = x[1][4:end]
-            if c != keepchr
+            if c != chrom
                 continue
             end
             meth = tryparse(Int, x[5])
@@ -21,10 +22,10 @@ function read_data(fp, keepchr)
             spos = tryparse(Int, x[2])
             epos = tryparse(Int, x[3])
             if !(isnothing(meth) || isnothing(nmeth) || isnothing(spos) || isnothing(epos))
-                den = meth + nmeth
+                tot = meth + nmeth
                 push!(chr, c)
                 push!(numer, meth)
-                push!(denom, den)
+                push!(denom, tot)
                 push!(startpos, spos)
                 push!(endpos, epos)
             end
